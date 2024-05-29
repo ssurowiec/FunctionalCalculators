@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "NJp96JtBiphQcPoTrly2I3c09A1r8yr/pORY3+bmdzlQ0dQ4rkXbxkrBRArjkRMD/W00aHG5f/zXsbzBPAI4XQ==",
+  "success": true,
+  "projectFilePath": "/home/ssurowiec/Desktop/Repos/Private/FunctionalCalculators/FSharp/FSharp.fsproj",
+  "expectedPackageFiles": [
+    "/home/ssurowiec/.nuget/packages/fsharp.core/7.0.400/fsharp.core.7.0.400.nupkg.sha512",
+    "/home/ssurowiec/.nuget/packages/microsoft.netcore.app.ref/6.0.21/microsoft.netcore.app.ref.6.0.21.nupkg.sha512",
+    "/home/ssurowiec/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.21/microsoft.aspnetcore.app.ref.6.0.21.nupkg.sha512",
+    "/home/ssurowiec/.nuget/packages/microsoft.netcore.app.host.linux-x64/6.0.21/microsoft.netcore.app.host.linux-x64.6.0.21.nupkg.sha512"
+  ],
+  "logs": []
+}
