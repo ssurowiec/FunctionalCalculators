@@ -22,7 +22,7 @@ module Operator =
 
         [<Literal>]
         let Divide = '/'
-        
+
         [<Literal>]
         let Power = '^'
 
@@ -55,8 +55,6 @@ module Evaluation =
             | Divide -> a / b
             | Power -> pown a b
 
-let charListToString (l: char list) = String.Concat(l |> List.toSeq)
-
 let rec computeCalculation (rawCalculation: string) =
     let splitComputation = rawCalculation.Replace(" ", String.Empty)
 
@@ -83,7 +81,7 @@ let rec computeCalculation (rawCalculation: string) =
             let ev = Evaluation.compute (prevEval number) Operator.Power
             computeEvaluation String.Empty ev rest
         | Operator.Signs.OpenBracket :: rest ->
-            let nestedCalculation = computeCalculation (rest |> charListToString)
+            let nestedCalculation = computeCalculation (String.Join(String.Empty, rest))
 
             rest
             |> List.findIndex (fun c -> c = Operator.Signs.CloseBracket)
@@ -99,4 +97,4 @@ let rec computeCalculation (rawCalculation: string) =
     computeEvaluation String.Empty id (splitComputation |> Seq.toList)
 
 let result2 = computeCalculation calculation
-printfn "Second result is: %i" result2
+printfn "Result is: %i" result2
