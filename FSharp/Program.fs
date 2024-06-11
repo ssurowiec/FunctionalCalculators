@@ -1,4 +1,6 @@
 ﻿open System
+open Microsoft.FSharp.Collections
+open Microsoft.FSharp.Core
 
 type Operator =
     | Add
@@ -17,42 +19,54 @@ module Operator =
 
 printfn "Set calculation: "
 let calculation = Console.ReadLine()
-let trimmed = calculation.Trim()
 type Evaluation = int -> Operator -> int -> int
+
 module Evaluation =
     let compute: Evaluation =
         fun a op b ->
             match op with
             | Add -> a + b
-            | Divide -> a / b
             | Subtract -> a - b
             | Multiply -> a * b
-let rec getAllCalculationOperators (operators: Operator list) (rawComputation: string) =
-    let charListToString (l:char list) =
-        System.String.Concat(l |> List.toSeq);
-    match rawComputation |> Seq.toList with
-    | [] -> operators
-    | '+' :: rest -> getAllCalculationOperators (operators @ [ Operator.Add ]) (rest |> charListToString)
-    | '-' :: rest -> getAllCalculationOperators (operators @ [ Operator.Subtract ]) (rest |> charListToString)
-    | '*' :: rest -> getAllCalculationOperators (operators @ [ Operator.Multiply ]) (rest |> charListToString)
-    | '/' :: rest -> getAllCalculationOperators (operators @ [ Operator.Divide ]) (rest |> charListToString)
-    | _ :: rest -> getAllCalculationOperators operators (rest |> charListToString)
+            | Divide -> a / b
 
-let getAllNumbers (rawComputation: string) (operators: Operator list) : int list =
-    let rawOperators = operators |> List.map (Operator.toChar)
+type Computation = Evaluation list
+let charListToString (l: char list) = String.Concat(l |> List.toSeq)
 
-    let rawNumbers = rawComputation.Split(rawOperators |> List.toArray)
-    rawNumbers |> Array.map int |> Array.toList
+let rec computeCalculation (rawCalculation: string) =
+    let splitComputation =
+        rawCalculation.Replace(" ", String.Empty)
 
-let operators = getAllCalculationOperators List.empty trimmed
-let numbers = getAllNumbers trimmed operators
+    let rec computeEvaluation (numberBuffer: string) (prevEval: int -> int) (c: string) =
+        match c |> Seq.toList with
+        | '+' :: rest ->
+            let number = numberBuffer |> int
+            let calculation = Evaluation.compute (prevEval number) Operator.Add
+            computeEvaluation String.Empty calculation (rest |> charListToString)
+        | '-' :: rest ->
+            let number = numberBuffer |> int
+            let ev = Evaluation.compute (prevEval number) Operator.Subtract
+            computeEvaluation String.Empty ev (rest |> charListToString)
+        | '*' :: rest ->
+            let number = numberBuffer |> int
+            let ev = Evaluation.compute (prevEval number) Operator.Multiply
+            computeEvaluation String.Empty ev (rest |> charListToString)
+        | '/' :: rest ->
+            let number = numberBuffer |> int
+            let ev = Evaluation.compute (prevEval number) Operator.Divide
+            computeEvaluation String.Empty ev (rest |> charListToString)
+        | '(' :: rest ->
+            let nestedCalculation = computeCalculation (rest |> charListToString)
+            let findClosestParentheses = rest |> List.findIndex (fun c -> c = ')')
+            let a = rest |> List.splitAt findClosestParentheses |> snd
 
-let firstNumber = numbers |> List.head
-let allComputations = List.zip operators (numbers |> List.tail)
+            computeEvaluation (nestedCalculation.ToString()) prevEval (a |> List.tail |> charListToString)
+        | ')' :: _ -> numberBuffer |> int |> prevEval
+        | d :: rest when Char.IsDigit(d) -> computeEvaluation $"{numberBuffer}{d}" prevEval (rest |> charListToString)
+        | _ :: rest -> computeEvaluation numberBuffer prevEval (rest |> charListToString)
+        | [] -> numberBuffer |> int |> prevEval
 
-let result =
-    allComputations
-    |> List.fold (fun a (op, b) -> Evaluation.compute a op b) firstNumber
+    computeEvaluation String.Empty id splitComputation
 
-
-printfn "result is : %i" result
+let result2 = computeCalculation calculation
+printfn "Second result is: %i" result2
