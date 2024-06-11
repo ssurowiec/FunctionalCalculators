@@ -61,46 +61,36 @@ module Evaluation =
 let rec computeCalculation (rawCalculation: string) =
     let splitComputation = rawCalculation.Replace(" ", String.Empty)
 
+    let createEvaluation
+        (number: int)
+        (operator: Operator)
+        (previousEvaluation: int -> Result<int, string>)
+        : int -> Result<int, string> =
+        fun previousNumber ->
+            previousEvaluation number
+            |> Result.bind (fun result -> Evaluation.compute result operator previousNumber)
+
     let rec computeEvaluation (numberBuffer: string) (prevEval: int -> Result<int, string>) (c: char list) =
         match c with
         | Operator.Signs.Add :: rest ->
             let number = numberBuffer |> int
-
-            let ev =
-                fun x -> prevEval number |> Result.bind (fun r -> Evaluation.compute r Operator.Add x)
-
+            let ev = createEvaluation number Operator.Add prevEval
             computeEvaluation String.Empty ev rest
         | Operator.Signs.Subtract :: rest ->
             let number = numberBuffer |> int
-
-            let ev =
-                fun x ->
-                    prevEval number
-                    |> Result.bind (fun r -> Evaluation.compute r Operator.Subtract x)
-
+            let ev = createEvaluation number Operator.Subtract prevEval
             computeEvaluation String.Empty ev rest
         | Operator.Signs.Multiply :: rest ->
             let number = numberBuffer |> int
-
-            let ev =
-                fun x ->
-                    prevEval number
-                    |> Result.bind (fun r -> Evaluation.compute r Operator.Multiply x)
-
+            let ev = createEvaluation number Operator.Multiply prevEval
             computeEvaluation String.Empty ev rest
         | Operator.Signs.Divide :: rest ->
             let number = numberBuffer |> int
-
-            let ev =
-                fun x -> prevEval number |> Result.bind (fun r -> Evaluation.compute r Operator.Divide x)
-
+            let ev = createEvaluation number Operator.Divide prevEval
             computeEvaluation String.Empty ev rest
         | Operator.Signs.Power :: rest ->
             let number = numberBuffer |> int
-
-            let ev =
-                fun x -> prevEval number |> Result.bind (fun r -> Evaluation.compute r Operator.Power x)
-
+            let ev = createEvaluation number Operator.Power prevEval
             computeEvaluation String.Empty ev rest
         | Operator.Signs.OpenBracket :: rest ->
             let nestedCalculation = computeCalculation (String.Join(String.Empty, rest))
